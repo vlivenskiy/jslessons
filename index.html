@@ -1,6 +1,291 @@
 <html>
-<head></head>
+<head>
+    <script src="./js/jquery/jquery.js" type="text/javascript"></script>
+   
+    <script src="./js/calc.js" type="text/javascript"></script>
+
+    <link href="./cs/styles.css" type="text/css" rel="stylesheet">
+    <style>
+        .calc {
+            background-color: #d2b08f;
+            width: 232px;
+            margin:0 auto;
+            padding: 15px;
+        }
+
+        .screen {
+            width: 200px;
+            height:35px;
+            background-color:#bccd95;
+            border: 3px solid black;
+            margin:5px;
+            box-shadow: inset 0.5px -0.5px 0px 1px #e5e4e4;
+            text-align: end;
+            font-size: 30px;
+        }
+        .screen-block {
+            width:100%;
+        }
+
+        .body-calc {
+            background-color: #3c4542;
+            padding:10px;
+            border-radius: 10px ;
+        }
+        button{
+            border:0px;
+            font-size: 14px;
+            width: 40px;
+            height: 30px;
+            margin: 5px;
+            padding: 0px;
+            border-radius: 7px ;
+            background-color: #2f2d2e;
+            color:white;
+            box-shadow: 0px 2px black;
+        }
+
+       .memory-button {
+            background-color:#6a6969;
+        }
+
+        .action-button {
+             color:black;
+             background-color: #ff4462;
+        }
+
+        .result-button {
+            background-color: #ff9933;
+            color:black;
+        }
+
+      
+    </style>
+    <script>
+        var calculator = {
+            operandA: '',
+            operandB: '',
+            action: '',
+            actionResult: '',
+            maxLength:13,
+
+
+            clearResult: function () {
+                if (this.actionResult) {
+                    this.clearAllVars();
+                }
+                else if (this.action && this.operandB) {
+                    this.operandB = '0';
+                } else {
+                    this.clearAllVars();
+                }
+            },
+
+            clearAllVars : function(){
+                this.operandA = '0';
+                this.operandB = '';
+                this.action = '';
+                this.actionResult = '';
+            },
+
+            checkCommaInOperand: function (operand, value) {
+                if (value !== '.') {
+                    return true;
+                }
+                var buf = operand + value;                
+
+                var result = !(/(\.{2})/.test(buf) || /(\..\.)/.test(buf));
+
+                if (!result)
+                    return false;
+
+                var regex = /\./gi, result, indices = [];
+
+                var indices = [];
+
+                var item;
+                while ((item = regex.exec(buf))) {
+                    indices.push(item.index);
+                }
+                
+                if (indices.length > 1) {
+                    result = false;
+                }
+
+                return result;
+            },
+          
+            updateValue: function (value) {
+                if (this.actionResult || this.isMaxLengthExceeded(value)) {
+                    return;
+                }
+
+                if (this.action && !(this.operandB === '0' && value === '0')) {
+                    if (this.operandB === '0') {
+                        this.operandB = '';
+                    }
+
+                    if (this.checkCommaInOperand(this.operandB, value) && !this.isMaxLengthExceeded(this.operandB)) {
+                        this.operandB = this.operandB + value;
+                    }
+                }
+                else if (!(this.operandA === '0' && value === '0')) {
+                    if (this.operandA === '0') {
+                        this.operandA = '';
+                    }
+
+                    if (this.checkCommaInOperand(this.operandA, value) && !this.isMaxLengthExceeded(this.operandA)) {
+                        this.operandA = this.operandA + value;
+                    }              
+                }
+            },
+
+            isMaxLengthExceeded: function (value) {
+                debugger
+                return value && value.length>= 13;
+            },
+
+            getCurrentValue: function () {                
+                if (this.actionResult) {
+                    return this.actionResult;
+                }
+                else if (this.operandB) {
+                    return this.operandB;
+                }
+                else {
+                    return this.operandA;
+                }
+
+            },
+            makeAction: function () {
+
+                var floatOperandA = parseFloat(this.operandA);
+                var floatOperandB = parseFloat(this.operandB);
+
+                switch (this.action) {
+                    case '+': this.actionResult = floatOperandA + floatOperandB; break;
+                    case '-': this.actionResult = floatOperandA - floatOperandB; break;
+                    case '*': this.actionResult = floatOperandA * floatOperandB; break;
+                    case '/': this.actionResult = floatOperandA / floatOperandB; break;
+                }
+            },
+            saveAction: function (action) {
+                this.action = action;
+            }
+        };
+
+        calculator.clearAllVars();
+     
+        $(function () {
+          
+
+            $('#calcScreen').text(calculator.getCurrentValue());
+       
+            $("button").click(function (event) {
+              
+                
+                var currentButtonObject = $(event.currentTarget);
+                var value = $(event.currentTarget).text();
+
+                var actionName = ''
+
+                if (currentButtonObject.hasClass('action-button')) {
+                    calculator.saveAction(value);
+                }else if (currentButtonObject.hasClass('result-button')) {
+                    calculator.makeAction();
+                } else if (currentButtonObject.hasClass('clear-button')) {
+                    calculator.clearResult();
+                } else {
+                    calculator.updateValue(value);
+                }
+
+                $('#calcScreen').text(calculator.getCurrentValue());
+
+
+             
+                
+                
+
+               
+
+                //switch (actionName)
+                //{
+                //    case 'clearButton': calculator.clearResult(); break;
+                //    case 'actionButton': calculator.saveAction(value); break;
+
+                //    default: calculator.updateValue(value);
+                //}
+
+                
+             
+                
+            });
+
+        });
+    </script>
+
+</head>
 <body>
-<p>My test page <strong>Strong font</strong></p>
+    <div class="calc">
+        <div class="body-calc">
+            <div class="screen-block" >
+                <div contenteditable="true" class="screen" id="calcScreen">
+                   
+                </div>
+            </div>
+            <div class="button-block">
+                <div>
+                    <button class="memory-button">mrc</button>
+                    <button class="memory-button">m-</button>
+                    <button class="memory-button">m+</button>
+                    <button class="action-button">/</button>
+               </div>
+                <div>
+                    <button>7</button>
+                    <button>8</button>
+                    <button>9</button>
+                    <button class="action-button">*</button>
+               </div>
+                <div>
+                    <button>4</button>
+                    <button>5</button>
+                    <button>6</button>
+                    <button class="action-button">-</button>
+               </div>
+               <div>
+                    <button>1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button class="action-button">+</button>
+               </div>
+                <div>
+                    <button>0</button>
+                    <button>.</button>
+                    <button class="clear-button">C</button>
+                    <button class="result-button">=</button>
+               </div>
+            </div>
+        </div>
+    </div>
+    
+   <!-- 
+    <div class="widget">
+        <h1>Widget Buttons</h1>
+        <button>A button element</button>
+
+        <input type="submit" value="A submit button">
+
+        <a href="#">An anchor</a>
+    </div>
+    <h1>CSS Buttons</h1>
+    <button class="ui-button ui-widget ui-corner-all">A button element</button>
+
+    <input class="ui-button ui-widget ui-corner-all" type="submit" value="A submit button">
+
+    <a class="ui-button ui-widget ui-corner-all" href="#">An anchor</a>-->
+
+
+
+ 
 </body>
 </html>
